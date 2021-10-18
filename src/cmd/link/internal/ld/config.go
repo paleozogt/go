@@ -74,7 +74,7 @@ func (mode *BuildMode) Set(s string) error {
 		*mode = BuildModeCArchive
 	case "c-shared":
 		switch buildcfg.GOARCH {
-		case "386", "amd64", "arm", "arm64", "ppc64le", "s390x":
+		case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "s390x":
 		default:
 			return badmode()
 		}
@@ -83,7 +83,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch buildcfg.GOOS {
 		case "linux":
 			switch buildcfg.GOARCH {
-			case "386", "amd64", "arm", "arm64", "ppc64le", "s390x":
+			case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "s390x":
 			default:
 				return badmode()
 			}
@@ -95,7 +95,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch buildcfg.GOOS {
 		case "linux":
 			switch buildcfg.GOARCH {
-			case "386", "amd64", "arm", "arm64", "s390x", "ppc64le":
+			case "386", "amd64", "arm", "arm64", "s390x", "ppc64", "ppc64le":
 			default:
 				return badmode()
 			}
@@ -196,7 +196,7 @@ func mustLinkExternal(ctxt *Link) (res bool, reason string) {
 	// Internally linking cgo is incomplete on some architectures.
 	// https://golang.org/issue/14449
 	// https://golang.org/issue/21961
-	if iscgo && ctxt.Arch.InFamily(sys.MIPS64, sys.MIPS, sys.PPC64, sys.RISCV64) {
+	if iscgo && ctxt.Arch.InFamily(sys.MIPS64, sys.MIPS, sys.RISCV64) {
 		return true, buildcfg.GOARCH + " does not support internal cgo"
 	}
 	if iscgo && (buildcfg.GOOS == "android" || buildcfg.GOOS == "dragonfly") {
@@ -285,8 +285,6 @@ func determineLinkMode(ctxt *Link) {
 		}
 	case LinkExternal:
 		switch {
-		case buildcfg.GOARCH == "ppc64" && buildcfg.GOOS != "aix":
-			Exitf("external linking not supported for %s/ppc64", buildcfg.GOOS)
 		}
 	}
 }
