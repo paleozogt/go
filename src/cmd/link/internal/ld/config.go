@@ -70,7 +70,7 @@ func (mode *BuildMode) Set(s string) error {
 		*mode = BuildModeCArchive
 	case "c-shared":
 		switch objabi.GOARCH {
-		case "386", "amd64", "arm", "arm64", "ppc64le", "s390x":
+		case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "s390x":
 		default:
 			return badmode()
 		}
@@ -79,7 +79,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch objabi.GOOS {
 		case "linux":
 			switch objabi.GOARCH {
-			case "386", "amd64", "arm", "arm64", "ppc64le", "s390x":
+			case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "s390x":
 			default:
 				return badmode()
 			}
@@ -91,7 +91,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch objabi.GOOS {
 		case "linux":
 			switch objabi.GOARCH {
-			case "386", "amd64", "arm", "arm64", "s390x", "ppc64le":
+			case "386", "amd64", "arm", "arm64", "s390x", "ppc64le", "ppc64":
 			default:
 				return badmode()
 			}
@@ -186,7 +186,7 @@ func mustLinkExternal(ctxt *Link) (res bool, reason string) {
 	// Internally linking cgo is incomplete on some architectures.
 	// https://golang.org/issue/14449
 	// https://golang.org/issue/21961
-	if iscgo && ctxt.Arch.InFamily(sys.MIPS64, sys.MIPS, sys.PPC64) {
+	if iscgo && ctxt.Arch.InFamily(sys.MIPS64, sys.MIPS) {
 		return true, objabi.GOARCH + " does not support internal cgo"
 	}
 
@@ -241,9 +241,6 @@ func determineLinkMode(ctxt *Link) {
 			}
 			ctxt.LinkMode = LinkInternal
 		case "1":
-			if objabi.GOARCH == "ppc64" && objabi.GOOS != "aix" {
-				Exitf("external linking requested via GO_EXTLINK_ENABLED but not supported for %s/ppc64", objabi.GOOS)
-			}
 			ctxt.LinkMode = LinkExternal
 		default:
 			if needed, _ := mustLinkExternal(ctxt); needed {
@@ -255,17 +252,10 @@ func determineLinkMode(ctxt *Link) {
 			} else {
 				ctxt.LinkMode = LinkInternal
 			}
-			if objabi.GOARCH == "ppc64" && objabi.GOOS != "aix" && ctxt.LinkMode == LinkExternal {
-				Exitf("external linking is not supported for %s/ppc64", objabi.GOOS)
-			}
 		}
 	case LinkInternal:
 		if needed, reason := mustLinkExternal(ctxt); needed {
 			Exitf("internal linking requested but external linking required: %s", reason)
-		}
-	case LinkExternal:
-		if objabi.GOARCH == "ppc64" && objabi.GOOS != "aix" {
-			Exitf("external linking not supported for %s/ppc64", objabi.GOOS)
 		}
 	}
 }
