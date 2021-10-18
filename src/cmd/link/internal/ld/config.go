@@ -74,7 +74,7 @@ func (mode *BuildMode) Set(s string) error {
 		*mode = BuildModeCArchive
 	case "c-shared":
 		switch buildcfg.GOARCH {
-		case "386", "amd64", "arm", "arm64", "ppc64le", "riscv64", "s390x":
+		case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "riscv64", "s390x":
 		default:
 			return badmode()
 		}
@@ -83,7 +83,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch buildcfg.GOOS {
 		case "linux":
 			switch buildcfg.GOARCH {
-			case "386", "amd64", "arm", "arm64", "ppc64le", "s390x":
+			case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "s390x":
 			default:
 				return badmode()
 			}
@@ -95,7 +95,7 @@ func (mode *BuildMode) Set(s string) error {
 		switch buildcfg.GOOS {
 		case "linux":
 			switch buildcfg.GOARCH {
-			case "386", "amd64", "arm", "arm64", "s390x", "ppc64le":
+			case "386", "amd64", "arm", "arm64", "s390x", "ppc64", "ppc64le":
 			default:
 				return badmode()
 			}
@@ -286,8 +286,6 @@ func determineLinkMode(ctxt *Link) {
 		}
 	case LinkExternal:
 		switch {
-		case buildcfg.GOARCH == "ppc64" && buildcfg.GOOS != "aix":
-			Exitf("external linking not supported for %s/ppc64", buildcfg.GOOS)
 		}
 	}
 }
